@@ -1,14 +1,31 @@
-﻿Rahil:
-1) I have read the details of the IEX Traidng API and created Model called Quotes to read the API details.
-Along with the details,i have added a property as week52PriceRange to calculate the week 52 price range strategy.
-2)We have picked the 52-Week Price Range Strategy which calculates the ratio to take the top 5 stocks whose score is 82% or higher.
-3)It was found that after calculations,we got the scenarios where the company names are empty, the denominato in the week52Price
-Range is 0 , Iexenabled values as false.We have removed those values and tried to get the valid companies from the list
-4)We faced some issues due to the API limitations of allowing only 100 symbols.We fetched all the symbol's data'
-and filtered those quotes whose difference between high value and low value is zero.
+﻿@{
+    ViewData["Title"] = "ImplementationSelfReflection";
+}
 
+<h2>IEX Trading Application</h2>
+<h2>Implementation Details</h2>
+<hr />
 
-Aayush:
-1)I have handled UI part of designing web pages for top 5 stocks page which displays all the values of stocks.
-2)I have created a web page to display the quote values of the top 5 stocks which is coming from the temp data.
-3)I made sure that all the null exceptions are checked and handled in the server side.
+<div>
+    <p>
+        We have used https://api.iextrading.com/1.0/ref-data/symbols to fetch all the symbols associated with companies or the firms taking part in the trading system.
+        Furthermore, https://api.iextrading.com/1.0/stock/market/batch?symbols={0}&types=quote is used to fetch details such as week52High, week52Low, latestPrice and other associated details which are used to calculate the top 5 stocks using below formula.
+        <div>
+            Deciding factor to pick top 5 otperforming stocks=(CurrentPrice - 52WeekLow)/(52WeekHigh - 52WeekLow).
+            If above deciding factor is greater than 82% then we can deduce that the particular stock is outperforming comparatively.
+            Else, if its under or equal to 41% we deduce that the associated stock is underperforming comparatively.
+        </div>
+    </p>
+    <h2>Self Reflection</h2>
+    <p>
+        We have comprehensively learnt below from this assignment:
+        <ul>
+            <li>Typical usage of HTML, CSS and JavaScript</li>
+            <li>Connection with databases using MVC</li>
+            <li>We have gained understanding on typical POCO used to transfer data between various layers of application</li>
+            <li>We have gained understanding on IEX trading website and other associated websites </li>
+            <li>Subtle and typical understanding on stocks, trading and associated variables which play a vital role to decide the top stocks</li>
+            <li>We have further investigated websites such as moneycontrol and investopedia to gain understanding of trading and stock holding</li>
+        </ul>
+    </p>
+</div>
