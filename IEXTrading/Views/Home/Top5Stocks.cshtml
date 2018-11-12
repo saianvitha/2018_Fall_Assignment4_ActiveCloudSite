@@ -1,13 +1,16 @@
 ﻿@model IEnumerable<IEXTrading.Models.Company>
 
-<h2>Company Symbols</h2>
+<h2>Symbols</h2>
 <hr />
 
-<table class="table">
+<table class="table" border="1" cellpadding="0" cellspacing="0" align="center">
     <thead>
         <tr>
             <th>
                 NAME:
+            </th>
+            <th>
+                IEXID:
             </th>
             <th>
                 SYMBOL:
@@ -26,8 +29,12 @@
         @foreach (var item in Model)
         {
         <tr>
+
             <td>
                 @Html.DisplayFor(modelItem => item.name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.iexId)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.symbol)
@@ -42,7 +49,7 @@
         </tr>
         }
         <tr>
-            <td>
+            <td align="center">
                 <a id="dbopt" asp-controller="Home" asp-action="PopulateSymbols"><img src="~/images/button_save-data.png" /></a>
             </td>
         </tr>

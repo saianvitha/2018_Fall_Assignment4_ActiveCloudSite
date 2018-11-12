@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Net.Http;
 using IEXTrading.Models;
 using Newtonsoft.Json;
@@ -20,34 +19,97 @@ namespace IEXTrading.Infrastructure.IEXTradingHandler
             httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
         }
 
-        /****
+        /**
          * Calls the IEX reference API to get the list of symbols. 
-        ****/
+        **/
         public List<Company> GetSymbols()
         {
             string IEXTrading_API_PATH = BASE_URL + "ref-data/symbols";
-            string companyList = "";
+            string companyListjsonResponse = "";
 
-            List<Company> companies = null;
+            List<Company> full_companies_list = null;
 
             httpClient.BaseAddress = new Uri(IEXTrading_API_PATH);
-            HttpResponseMessage response = httpClient.GetAsync(IEXTrading_API_PATH).GetAwaiter().GetResult();
-            if (response.IsSuccessStatusCode)
+            HttpResponseMessage responseObj = httpClient.GetAsync(IEXTrading_API_PATH).GetAwaiter().GetResult();
+            if (responseObj.IsSuccessStatusCode)
             {
-                companyList = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                companyListjsonResponse = responseObj.Content.ReadAsStringAsync().GetAwaiter().GetResult();
             }
 
-            if (!companyList.Equals(""))
+            if (!companyListjsonResponse.Equals(""))
             {
-                companies = JsonConvert.DeserializeObject<List<Company>>(companyList);
-                companies = companies.GetRange(0, 9);
+                full_companies_list = JsonConvert.DeserializeObject<List<Company>>(companyListjsonResponse);
             }
-            return companies;
+            return full_companies_list;
         }
 
-        /****
+        /**
+         * Calls the IEX reference API to get the list of symbols of top stocks. 
+        **/
+        public List<KeyValuePair<string, Dictionary<string, Quote>>> GetQuotes(List<Company> companies_final)
+        {
+            int Count = 0;
+            Dictionary<string, Dictionary<string, Quote>> List_Quote = new Dictionary<string, Dictionary<string, Quote>>();
+            // Since we have more than 8756, and it doesn't take more than 100 at a time, running the while loop for 87 times + 56
+            while (true)
+            {   
+                //The if condition checks for count is less than Companies Count
+                if (Count < companies_final.Count())
+                {
+                    Dictionary<string, Dictionary<string, Quote>> quotes_Name = null;
+                    string companysymbols = "";
+                    //The count will be skipped for every 100 companies
+                    companysymbols = string.Join(",", companies_final.Select(b => b.symbol).Skip(Count).Take(100));
+
+
+                    string API_PATH = BASE_URL + "stock/market/batch?symbols={0}&types=quote";
+                    API_PATH = string.Format(API_PATH, companysymbols);
+                    HttpResponseMessage output = httpClient.GetAsync(API_PATH).GetAwaiter().GetResult();
+                    string Json_quote = "";                                      
+                    if (output.IsSuccessStatusCode)
+                    {
+                        Json_quote = output.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                    }
+
+                    if (!string.IsNullOrEmpty(Json_quote))
+                    {
+
+                        quotes_Name = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, Quote>>>(Json_quote);
+                        
+                        quotes_Name = quotes_Name.Where(x => ((x.Value?.FirstOrDefault().Value?.companyName != "") &&
+                        (x.Value?.FirstOrDefault().Value?.week52High - x.Value?.FirstOrDefault().Value?.week52Low) != 0)
+                        ).ToDictionary(x => x.Key, x => x.Value);
+                        Count += 100;
+                        List_Quote = List_Quote.Concat(quotes_Name).ToDictionary(y => y.Key, b => b.Value);
+
+                    }
+                }
+                else
+                {
+                    break;
+                }
+            }
+            if (List_Quote != null)
+            {
+                foreach (var lq in List_Quote)
+                {
+                    if (lq.Value != null)
+                    {
+                        if (lq.Value.FirstOrDefault().Value != null)
+                        {
+                            var Value_quote = lq.Value.FirstOrDefault().Value;
+                            lq.Value.FirstOrDefault().Value.week_52_Price_Range = (Value_quote.close - Value_quote.week52Low) / (Value_quote.week52High - Value_quote.week52Low);
+                        }
+                    }
+                }
+            }
+
+            return List_Quote.OrderByDescending(y => y.Value?.FirstOrDefault().Value?.week_52_Price_Range).Take(5).ToList();
+        }
+
+        /**
          * Calls the IEX stock API to get 1 year's chart for the supplied symbol. 
-        ****/
+        **/
         public List<Equity> GetChart(string symbol)
         {
             //Using the format method.

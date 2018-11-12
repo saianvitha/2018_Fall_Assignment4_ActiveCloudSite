@@ -36,7 +36,7 @@ namespace MVCTemplate.Controllers
             ViewBag.dbSucessComp = 0;
             IEXHandler webHandler = new IEXHandler();
             List<Company> companies = webHandler.GetSymbols();
-
+            companies = companies.GetRange(0, 9);
             //Save comapnies in TempData
             TempData["Companies"] = JsonConvert.SerializeObject(companies);
 
@@ -60,7 +60,7 @@ namespace MVCTemplate.Controllers
                 equities = equities.OrderBy(c => c.date).ToList(); //Make sure the data is in ascending order of date.
             }
 
-            CompaniesEquities companiesEquities = getCompaniesEquitiesModel(equities);
+            CompaniesEquities companiesEquities = getCmpnyEqtMdll(equities);
 
             return View(companiesEquities);
         }
@@ -117,7 +117,7 @@ namespace MVCTemplate.Controllers
             dbContext.SaveChanges();
             ViewBag.dbSuccessChart = 1;
 
-            CompaniesEquities companiesEquities = getCompaniesEquitiesModel(equities);
+            CompaniesEquities companiesEquities = getCmpnyEqtMdll(equities);
 
             return View("Chart", companiesEquities);
         }
@@ -150,23 +150,60 @@ namespace MVCTemplate.Controllers
         /****
          * Returns the ViewModel CompaniesEquities based on the data provided.
          ****/
-        public CompaniesEquities getCompaniesEquitiesModel(List<Equity> equities)
+        public CompaniesEquities getCmpnyEqtMdll(List<Equity> eqts)
         {
-            List<Company> companies = dbContext.Companies.ToList();
+            List<Company> companies_list = dbContext.Companies.ToList();
 
-            if (equities.Count == 0)
+            if (eqts.Count == 0)
             {
-                return new CompaniesEquities(companies, null, "", "", "", 0, 0);
+                return new CompaniesEquities(companies_list, null, "", "", "", 0, 0);
             }
 
-            Equity current = equities.Last();
-            string dates = string.Join(",", equities.Select(e => e.date));
-            string prices = string.Join(",", equities.Select(e => e.high));
-            string volumes = string.Join(",", equities.Select(e => e.volume / 1000000)); //Divide vol by million
-            float avgprice = equities.Average(e => e.high);
-            double avgvol = equities.Average(e => e.volume) / 1000000; //Divide volume by million
-            return new CompaniesEquities(companies, equities.Last(), dates, prices, volumes, avgprice, avgvol);
+            Equity current = eqts.Last();
+            string dates = string.Join(",", eqts.Select(e => e.date));
+            string prices = string.Join(",", eqts.Select(e => e.high));
+            string volumes = string.Join(",", eqts.Select(e => e.volume / 1000000)); //Divide vol by million
+            float avgprice = eqts.Average(e => e.high);
+            double avgvol = eqts.Average(e => e.volume) / 1000000; //Divide volume by million
+            return new CompaniesEquities(companies_list, eqts.Last(), dates, prices, volumes, avgprice, avgvol);
         }
 
+        /**
+         * This quickaction will return the top 5 stocks based on the 52-week price range strategy .
+        **/  
+        public IActionResult Top5Stocks()
+        {
+            ViewBag.dbSucessComp = 0;
+            IEXHandler webHandler = new IEXHandler();
+            List<Company> company_list = webHandler.GetSymbols();
+            company_list = company_list.Where(a => a.isEnabled && a.type != "N/A").ToList();
+            List<KeyValuePair<string, Dictionary<string, Quote>>> cmpny_quotes = webHandler.GetQuotes(company_list);
+            var flt_cmpny = company_list.Where(a => cmpny_quotes.Any(x => x.Key.Equals(a.symbol))).ToList();
+            TempData["Quotes"] = JsonConvert.SerializeObject(cmpny_quotes);
+            TempData["Companies"] = JsonConvert.SerializeObject(flt_cmpny);
+            return View(flt_cmpny);
+        }
+
+        /**
+         * The Quotes action will pick the Top 5 stocks based on the 52-week price range strategy
+     
+        **/
+        public IActionResult Quotes()
+        {
+            List<KeyValuePair<string, Dictionary<string, Quote>>> quotes = JsonConvert.DeserializeObject<List<KeyValuePair<string, Dictionary<string, Quote>>>>(TempData["Quotes"].ToString());
+            List<Quote> Quote_New = new List<Quote>();
+            foreach (var quoteObject in quotes)
+            {
+                Quote quote = quoteObject.Value.FirstOrDefault().Value;
+                Quote_New.Add(quote);
+            }
+
+            return View(Quote_New);
+        }
+
+        public IActionResult ImplementationSelfReflection()
+        {
+            return View();
+        }
     }
 }
