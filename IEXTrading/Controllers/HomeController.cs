@@ -98,6 +98,23 @@ namespace MVCTemplate.Controllers
             return View("Symbols", companies);
         }
 
+        public IActionResult PopulateHealthCare()
+        {
+            List<Quote> companies = JsonConvert.DeserializeObject<List<Quote>>(TempData["HealthQuote"].ToString());
+            foreach (Quote company in companies)
+            {
+                //Database will give PK constraint violation error when trying to insert record with existing PK.
+                //So add company only if it doesnt exist, check existence using symbol (PK)
+                if (dbContext.Quotes.Where(c => c.symbol.Equals(company.symbol)).Count() == 0)
+                {
+                    dbContext.Quotes.Add(company);
+                }
+            }
+            dbContext.SaveChanges();
+            ViewBag.dbSuccessComp = 1;
+            return View("Top5HealthCareStocks", companies);
+        }
+
         /****
          * Saves the equities in database.
         ****/
@@ -170,7 +187,7 @@ namespace MVCTemplate.Controllers
 
         /**
          * This quickaction will return the top 5 stocks based on the 52-week price range strategy .
-        **/  
+        **/
         public IActionResult Top5Stocks()
         {
             ViewBag.dbSucessComp = 0;
@@ -178,10 +195,23 @@ namespace MVCTemplate.Controllers
             List<Company> company_list = webHandler.GetSymbols();
             company_list = company_list.Where(a => a.isEnabled && a.type != "N/A").ToList();
             List<KeyValuePair<string, Dictionary<string, Quote>>> cmpny_quotes = webHandler.GetQuotes(company_list);
-            var flt_cmpny = company_list.Where(a => cmpny_quotes.Any(x => x.Key.Equals(a.symbol))).ToList();
+            List<Company> flt_cmpny = company_list.Where(a => cmpny_quotes.Any(x => x.Key.Equals(a.symbol))).ToList();
             TempData["Quotes"] = JsonConvert.SerializeObject(cmpny_quotes);
             TempData["Companies"] = JsonConvert.SerializeObject(flt_cmpny);
             return View(flt_cmpny);
+        }
+
+        /**
+         * This quickaction will return the top 5 health care stocks based on the 52-week price range strategy .
+        **/
+        public IActionResult Top5HealthCareStocks()
+        {
+            ViewBag.dbSucessComp = 0;
+            IEXHandler webHandler = new IEXHandler();
+            List<Quote> company_list = webHandler.GetSymbolsForHealthCare();
+            List<Quote> cmpny_quotes = webHandler.GetenhancedQuotes(company_list);
+            TempData["HealthQuote"] = JsonConvert.SerializeObject(cmpny_quotes);
+            return View(cmpny_quotes);
         }
 
         /**

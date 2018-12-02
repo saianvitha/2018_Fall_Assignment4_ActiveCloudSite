@@ -6,15 +6,9 @@ using System.Threading.Tasks;
 
 namespace IEXTrading.Models
 {
-
-    public class SymbolQuote
+    public class HealthQuote
     {
-        public Dictionary<string, Quote> quote { get; set; }
-    }
-
-    public class Quote
-    {
-        public float? week52PriceRange { get; set; }// To calculate 52-week Price Range for picking top 5 stocks
+        public float? week_52_Price_Range { get; set; }// To calculate 52-week Price Range for picking top 5 stocks
         [Key]
         public string symbol { get; set; }
         public string companyName { get; set; }
@@ -56,8 +50,5 @@ namespace IEXTrading.Models
         public float? week52High { get; set; }
         public float? week52Low { get; set; }
         public float? ytdChange { get; set; }
-
-        
     }
-
 }

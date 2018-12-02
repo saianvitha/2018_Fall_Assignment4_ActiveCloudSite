@@ -52,7 +52,7 @@ namespace IEXTrading.Infrastructure.IEXTradingHandler
             Dictionary<string, Dictionary<string, Quote>> List_Quote = new Dictionary<string, Dictionary<string, Quote>>();
             // Since we have more than 8756, and it doesn't take more than 100 at a time, running the while loop for 87 times + 56
             while (true)
-            {   
+            {
                 //The if condition checks for count is less than Companies Count
                 if (Count < companies_final.Count())
                 {
@@ -63,9 +63,10 @@ namespace IEXTrading.Infrastructure.IEXTradingHandler
 
 
                     string API_PATH = BASE_URL + "stock/market/batch?symbols={0}&types=quote";
+                    //string API_PATH = BASE_URL + "stock/market/collection/sector?collectionName=Health%20Care";
                     API_PATH = string.Format(API_PATH, companysymbols);
                     HttpResponseMessage output = httpClient.GetAsync(API_PATH).GetAwaiter().GetResult();
-                    string Json_quote = "";                                      
+                    string Json_quote = "";
                     if (output.IsSuccessStatusCode)
                     {
                         Json_quote = output.Content.ReadAsStringAsync().GetAwaiter().GetResult();
@@ -75,7 +76,7 @@ namespace IEXTrading.Infrastructure.IEXTradingHandler
                     {
 
                         quotes_Name = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, Quote>>>(Json_quote);
-                        
+
                         quotes_Name = quotes_Name.Where(x => ((x.Value?.FirstOrDefault().Value?.companyName != "") &&
                         (x.Value?.FirstOrDefault().Value?.week52High - x.Value?.FirstOrDefault().Value?.week52Low) != 0)
                         ).ToDictionary(x => x.Key, x => x.Value);
@@ -98,14 +99,17 @@ namespace IEXTrading.Infrastructure.IEXTradingHandler
                         if (lq.Value.FirstOrDefault().Value != null)
                         {
                             var Value_quote = lq.Value.FirstOrDefault().Value;
-                            lq.Value.FirstOrDefault().Value.week_52_Price_Range = (Value_quote.close - Value_quote.week52Low) / (Value_quote.week52High - Value_quote.week52Low);
+                            lq.Value.FirstOrDefault().Value.week52PriceRange = (Value_quote.close - Value_quote.week52Low) / (Value_quote.week52High - Value_quote.week52Low);
                         }
                     }
                 }
             }
 
-            return List_Quote.OrderByDescending(y => y.Value?.FirstOrDefault().Value?.week_52_Price_Range).Take(5).ToList();
+            return List_Quote.OrderByDescending(y => y.Value?.FirstOrDefault().Value?.week52PriceRange).Take(5).ToList();
         }
+
+
+
 
         /**
          * Calls the IEX stock API to get 1 year's chart for the supplied symbol. 
@@ -138,6 +142,46 @@ namespace IEXTrading.Infrastructure.IEXTradingHandler
             }
 
             return Equities;
+        }
+
+        /**
+         * Changes for enhancement
+        **/
+        public List<Quote> GetenhancedQuotes(List<Quote> companies_final)
+        {
+            List<Quote> List_Quote = new List<Quote>();
+            companies_final = companies_final.Where(x => ((x.companyName != "") &&
+                        (x.week52High - x.week52Low) != 0)
+                        ).ToList();
+            foreach (var company in companies_final)
+            {
+                company.week52PriceRange = (company.close - company.week52Low) / (company.week52High - company.week52Low);
+            }
+
+            // Since we have more than 8756, and it doesn't take more than 100 at a time, running the while loop for 87 times + 56
+
+            return companies_final.OrderByDescending(y => y.week52PriceRange).Take(5).ToList();
+        }
+
+        public List<Quote> GetSymbolsForHealthCare()
+        {
+            string IEXTrading_API_PATH = BASE_URL + "/stock/market/collection/sector?collectionName=Health%20Care";
+            string companyListjsonResponse = "";
+
+            List<Quote> full_companies_list = null;
+
+            httpClient.BaseAddress = new Uri(IEXTrading_API_PATH);
+            HttpResponseMessage responseObj = httpClient.GetAsync(IEXTrading_API_PATH).GetAwaiter().GetResult();
+            if (responseObj.IsSuccessStatusCode)
+            {
+                companyListjsonResponse = responseObj.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            }
+
+            if (!companyListjsonResponse.Equals(""))
+            {
+                full_companies_list = JsonConvert.DeserializeObject<List<Quote>>(companyListjsonResponse);
+            }
+            return full_companies_list;
         }
     }
 }
