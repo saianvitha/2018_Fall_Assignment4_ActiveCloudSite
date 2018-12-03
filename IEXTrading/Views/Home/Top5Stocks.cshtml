@@ -1,4 +1,7 @@
 ﻿@model IEnumerable<IEXTrading.Models.Company>
+@{
+    ViewData["Title"] = "Top 5 Stocks";
+}
 
 <h2>Symbols</h2>
 <hr />
@@ -28,25 +31,25 @@
 
         @foreach (var item in Model)
         {
-        <tr>
+            <tr>
 
-            <td>
-                @Html.DisplayFor(modelItem => item.name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.iexId)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.symbol)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.type)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.date)
-            </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.iexId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.symbol)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.type)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.date)
+                </td>
 
-        </tr>
+            </tr>
         }
         <tr>
             <td align="center">

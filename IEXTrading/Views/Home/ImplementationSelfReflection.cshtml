@@ -1,5 +1,5 @@
 ﻿@{
-    ViewData["Title"] = "ImplementationSelfReflection";
+    ViewData["Title"] = "Implementation And Self Reflection";
 }
 
 <h2>IEX Trading Application</h2>
@@ -8,24 +8,30 @@
 
 <div>
     <p>
-        We have used https://api.iextrading.com/1.0/ref-data/symbols to fetch all the symbols associated with companies or the firms taking part in the trading system.
-        Furthermore, https://api.iextrading.com/1.0/stock/market/batch?symbols={0}&types=quote is used to fetch details such as week52High, week52Low, latestPrice and other associated details which are used to calculate the top 5 stocks using below formula.
+        We have used the <a href="https://api.iextrading.com/1.0/ref-data/symbols">IEXTrading API</a> to fetch all the symbols associated with companies or firms taking part in the trading system.
+        Furthermore, <a href="https://api.iextrading.com/1.0/stock/market/batch?symbols={0}&types=quote">The API</a> was also used to fetch details such as 52WeekHigh, 52WeekLow, latestPrice and other associated details which were used to calculate the top 5 stocks using below formula.
         <div>
-            Deciding factor to pick top 5 otperforming stocks=(CurrentPrice - 52WeekLow)/(52WeekHigh - 52WeekLow).
-            If above deciding factor is greater than 82% then we can deduce that the particular stock is outperforming comparatively.
-            Else, if its under or equal to 41% we deduce that the associated stock is underperforming comparatively.
+            The deciding factor that we used to pick the top 5 outperforming stocks is = (CurrentPrice - 52WeekLow)/(52WeekHigh - 52WeekLow).
+            If above deciding factor is greater than 82%, then we can deduce that the particular stock is outperforming comparatively.
+            Else, if its under or equal to 41%, we deduce that the associated stock is underperforming comparatively.
         </div>
+    <p>
+        For futher enhancement, we have extended the above strategy to pick the top 5 outperforming stocks of companies from the Health Care industry under "Top 5 Health Care Stocks". It utilizes the same formula as above.
+    </p>
+
     </p>
     <h2>Self Reflection</h2>
     <p>
-        We have comprehensively learnt below from this assignment:
+        We have obtained a comprehensive understanding of the below areas from this assignment:
         <ul>
             <li>Typical usage of HTML, CSS and JavaScript</li>
             <li>Connection with databases using MVC</li>
             <li>We have gained understanding on typical POCO used to transfer data between various layers of application</li>
-            <li>We have gained understanding on IEX trading website and other associated websites </li>
-            <li>Subtle and typical understanding on stocks, trading and associated variables which play a vital role to decide the top stocks</li>
-            <li>We have further investigated websites such as moneycontrol and investopedia to gain understanding of trading and stock holding</li>
+            <li>We have gained a decent understanding of IEX trading website and other associated websites </li>
+            <li>We now have an idea about the stock market, how to pick companies to invest based on stock picking strategies, and resources on personal finance and financial markets</li>
+            <li>Subtle and typical understanding of stocks, trading and associated variables which play a vital role in deciding the top stocks</li>
+            <li>We have further investigated websites such as Moneycontrol and Investopedia to gain deeper understanding of trading and stock holding</li>
+            <li>We have learnt how to work with Azure, create Web applications and SQL Databases in it, and deploy an application to the Azure cloud platform</li>
         </ul>
     </p>
 </div>

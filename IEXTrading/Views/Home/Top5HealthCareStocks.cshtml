@@ -1,4 +1,7 @@
 ﻿@model IEnumerable<IEXTrading.Models.Quote>
+@{
+    ViewData["Title"] = "Top 5 Health Care Stocks";
+}
 
 <h2>top 5 HealthCare stocks</h2>
 <hr />
@@ -10,17 +13,17 @@
                 NAME:
             </th>
             @*<th>
-                IEXID:
-            </th>*@
+                    IEXID:
+                </th>*@
             <th>
                 SYMBOL:
             </th>
             @*<th>
-                TYPE:
-            </th>*@
+                    TYPE:
+                </th>*@
             @*<th>
-                DATE:
-            </th>*@
+                    DATE:
+                </th>*@
         </tr>
     </thead>
 
@@ -34,17 +37,17 @@
                     @Html.DisplayFor(modelItem => item.companyName)
                 </td>
                 @*<td>
-                    @Html.DisplayFor(modelItem => item.)
-                </td>*@
+                        @Html.DisplayFor(modelItem => item.)
+                    </td>*@
                 <td>
                     @Html.DisplayFor(modelItem => item.symbol)
                 </td>
                 @*<td>
-                    @Html.DisplayFor(modelItem => item.type)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.date)
-                </td>*@
+                        @Html.DisplayFor(modelItem => item.type)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.date)
+                    </td>*@
 
             </tr>
         }
